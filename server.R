@@ -33,31 +33,17 @@ function(input, output, session) {
     seasons_1 <- seasons
     # Apply filters
     if (!is.null(minx) & !is.null(maxx) & !is.null(miny) & !is.null(maxy)) {
-      cat("applying filters beginning...\n")
-      print(seasons[seasons$ID==1706, c("Player")])
-      cat("dim seasons", dim(seasons), "\n")
-      cat(minx, maxx, miny, maxy)
       seasons_1 <- seasons %>% 
         filter(eval(parse(text = input$xvar)) >= minx, # need to convert "Year" to Year
                eval(parse(text = input$xvar)) <= maxx,
                eval(parse(text = input$yvar)) >= miny,
                eval(parse(text = input$yvar)) <= maxy) 
-      print(seasons_1[seasons_1$ID==1706, c("Player")])
-      cat("dim seasons", dim(seasons_1))
-      cat("...applying filters finished\n")
     }
-    cat(dim(seasons_1))
-    #seasons <- as.data.frame(seasons)
-    print(seasons[seasons$ID==1706, c("Player")])
     seasons_1
   })
   
   # Function for generating tooltip text
   player_tooltip <- function(x) {
-    print(str(x))
-    cat(names(x)[1], names(x)[2], names(x)[3])
-    cat(x[[1]], x[[2]], x[[3]])
-    cat("x= ", x$ID)
     if (is.null(x)) return(NULL)
     if (is.null(x$ID)) return(NULL)
     
@@ -109,6 +95,41 @@ function(input, output, session) {
                 sep = "")
   })
   
+  # Drop Downs for players
+  goatlist <- list("Wilt Chamberlain" = "Wilt Chamberlain", 
+                   "Larry Bird" = "Larry Bird",
+                   "Kareem Abdul-Jabbar" = "Kareem Abdul-Jabbar",
+                   "Michael Jordan"="Michael Jordan",
+                   "Shaquille O'Neal"="Shaquille O'Neal",
+                   "Lebron James"="LeBron James",
+                   "Kevin Durant"="Kevin Durant")
+  
+  output$Goats1 <- renderUI({
+    selectInput("goat1", 
+                label = p(""),
+                choices = goatlist, 
+                selected = "Wilt Chamberlain")
+  })
+  output$Goats2 <- renderUI({
+    selectInput("goat2", 
+                label = p(""),
+                choices = goatlist, 
+                selected = "Kareem Abdul-Jabbar")
+  })
+  output$Goats3 <- renderUI({
+    selectInput("goat3", 
+                label = p(""),
+                choices = goatlist, 
+                selected = "Michael Jordan")
+  })
+  output$Goats4 <- renderUI({
+    selectInput("goat4", 
+                label = p(""),
+                choices = goatlist, 
+                selected = "LeBron James")
+  })
+  
+  
   # A reactive expression with the ggvis plot
   vis <- reactive({
     # Lables for axes
@@ -118,20 +139,33 @@ function(input, output, session) {
     # Normally we could do something like props(x = ~BoxOffice, y = ~Reviews),
     # but since the inputs are strings, we need to do a little more work.
     xvar <- prop("x", as.symbol(input$xvar))
-    # cat(str(xvar))
+    cat("xvar\n")
+    print(xvar)
     yvar <- prop("y", as.symbol(input$yvar))
+    print(input$goat1)
     
     seasons_r() %>%
       ggvis(x = xvar, y = yvar) %>%
-      layer_points(size := 50, size.hover := 200,
-                   fillOpacity := 0.2, fillOpacity.hover := 0.5, key := ~ID) %>% # 'key' makes ID available for hover
+      layer_points(size := 50, 
+                   size.hover := 200,
+                   fillOpacity := 0.2, 
+                   fillOpacity.hover := 0.5, 
+                   #fill = ~Player,
+                   key := ~ID) %>% # 'key' makes ID available for hover
       add_tooltip(player_tooltip, "hover") %>%
       add_axis("x", title = xvar_name, format="####", ticks = 5) %>% # format to keep round numbers
       add_axis("y", title = yvar_name) %>%
-      add_legend("stroke", title = "NBA Champion", values = c("Yes", "No")) %>%
-      scale_nominal("stroke", domain = c("Yes", "No"),
-                    range = c("orange", "#aaa")) %>%
-      set_options(width = 500, height = 500)
+      #add_legend("stroke", title = "NBA Champion", values = c("Yes", "No")) %>%
+      #scale_nominal("stroke", domain = c("Yes", "No"), range = c("orange", "#aaa")) %>%
+      set_options(width = 500, height = 500) %>%
+      #layer_paths(data = subset(seasons_r(), Player == input$goat1), size = 20) %>%
+      layer_points(data = subset(seasons_r(), Player == input$goat1), fill = paste0("", input$goat1)) %>%
+      layer_points(data = subset(seasons_r(), Player == input$goat2), fill = paste0("", input$goat2)) %>%
+      layer_points(data = subset(seasons_r(), Player == input$goat3), fill = paste0("", input$goat3)) %>%
+      layer_points(data = subset(seasons_r(), Player == input$goat4), fill = paste0("", input$goat4)) %>%
+      add_legend("fill", title = "Players")
+    
+      
   })
   
   vis %>% bind_shiny("plot1")

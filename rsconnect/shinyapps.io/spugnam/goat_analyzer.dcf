@@ -1,0 +1,12 @@
+name: goat_analyzer
+title: Goat Analyzer
+username:
+account: spugnam
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 219769
+bundleId: 1001102
+url: https://spugnam.shinyapps.io/goat_analyzer/
+when: 1506571050.42961
+asMultiple: FALSE
+asStatic: FALSE

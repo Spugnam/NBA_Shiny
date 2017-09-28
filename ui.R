@@ -13,12 +13,11 @@ fluidPage(
   fluidRow(
     column(3,
            wellPanel(
-             h4("Players"),
-             checkboxGroupInput("checkGroup",
-                                label=h5("Choose players"),
-                                choices=list("Michael Jordan"=1,
-                                             "Lebron James"=2,
-                                             "The Gnam"=3))
+             h4("GOATs"),
+             uiOutput("Goats1"),
+             uiOutput("Goats2"),
+             uiOutput("Goats3"),
+             uiOutput("Goats4")
            ),
            wellPanel(
              h4("Graph"),
